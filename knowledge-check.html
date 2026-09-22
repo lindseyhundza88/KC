@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knowledge Check – Time Entry Training</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #e8edf2;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-size: 13px;
+    color: #333;
+    padding: 20px 16px 40px;
+  }
+
+  /* ── Page header — matches rule-banner style ── */
+  .page-header {
+    background: #1e4da1;
+    border-radius: 4px 4px 0 0;
+    padding: 12px 18px;
+    max-width: 860px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .page-header h1 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.01em;
+  }
+  .page-header .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .progress-label { font-size: 11px; color: rgba(255,255,255,0.75); }
+  .progress-bar-bg {
+    width: 120px; height: 6px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 3px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: #ffec00;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
+  .page-subheader {
+    background: #c8d8e8;
+    border: 1px solid #a8b8cc;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    padding: 8px 18px;
+    max-width: 860px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: #444;
+  }
+
+  /* ── Question card ── */
+  .q-card {
+    background: #fff;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    max-width: 860px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .q-topbar {
+    background: #1e4da1;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .q-tag {
+    font-size: 10px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.18);
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .q-body { padding: 14px 18px 16px; }
+
+  .q-stem {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111;
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+
+  /* Answer options */
+  .options { display: flex; flex-direction: column; gap: 7px; }
+
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 12px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background: #f7f7f7;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    user-select: none;
+  }
+  .option:hover { background: #eef3fa; border-color: #90a8cc; }
+  .option.selected-correct {
+    background: #e8f5e8;
+    border-color: #60a860;
+  }
+  .option.selected-wrong {
+    background: #fde8e8;
+    border-color: #e05050;
+  }
+  .option.reveal-correct {
+    background: #e8f5e8;
+    border-color: #60a860;
+  }
+  .option.dimmed {
+    opacity: 0.45;
+  }
+
+  .option-letter {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #ddd;
+    color: #555;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+  .selected-correct .option-letter { background: #60a860; color: #fff; }
+  .selected-wrong   .option-letter { background: #e05050; color: #fff; }
+  .reveal-correct   .option-letter { background: #60a860; color: #fff; }
+
+  .option-text {
+    font-size: 12px;
+    color: #222;
+    line-height: 1.45;
+    padding-top: 2px;
+  }
+
+  /* Feedback banner */
+  .feedback {
+    display: none;
+    margin-top: 12px;
+    padding: 9px 12px;
+    border-radius: 3px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .feedback.correct { background: #e8f5e8; border: 1px solid #80c080; color: #1a4a1a; }
+  .feedback.wrong   { background: #fde8e8; border: 1px solid #e08080; color: #6a1a1a; }
+  .feedback strong  { font-weight: 700; }
+
+  /* Submit button */
+  .q-footer {
+    background: #f0f0f0;
+    border-top: 1px solid #ddd;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .btn-submit {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 18px;
+    border-radius: 3px;
+    border: 1px solid #1a3d80;
+    background: #1e4da1;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-submit:hover { background: #1a3d80; }
+  .btn-submit:disabled { background: #aaa; border-color: #aaa; cursor: default; }
+
+  .answered-badge {
+    display: none;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 10px;
+  }
+  .answered-badge.correct { background: #e8f5e8; color: #1a5a1a; border: 1px solid #80c080; }
+  .answered-badge.wrong   { background: #fde8e8; color: #8a2020; border: 1px solid #e08080; }
+
+  /* ── Score summary card (hidden until all answered) ── */
+  .score-card {
+    display: none;
+    background: #fff;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    max-width: 860px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .score-topbar {
+    background: #1e4da1;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 9px 14px;
+  }
+  .score-body {
+    padding: 20px 18px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+  .score-circle {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    border: 4px solid #1e4da1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .score-num { font-size: 26px; font-weight: 700; color: #1e4da1; line-height: 1; }
+  .score-denom { font-size: 11px; color: #888; }
+  .score-text { flex: 1; }
+  .score-text h3 { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 6px; }
+  .score-text p  { font-size: 12px; color: #555; line-height: 1.5; }
+  .score-footer {
+    background: #f0f0f0;
+    border-top: 1px solid #ddd;
+    padding: 8px 14px;
+    display: flex; justify-content: flex-end;
+  }
+  .btn-retry {
+    font-size: 12px; font-weight: 600;
+    padding: 5px 16px; border-radius: 3px;
+    border: 1px solid #bbb; background: #e8e8e8;
+    color: #333; cursor: pointer;
+  }
+  .btn-retry:hover { background: #ddd; }
+</style>
+</head>
+<body>
+
+<!-- Page header -->
+<div class="page-header">
+  <h1>Knowledge Check — Time Entry Training</h1>
+  <div class="progress-wrap">
+    <span class="progress-label" id="progress-label">0 of 6 answered</span>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+<div class="page-subheader">
+  Answer all six questions based on what you've learned about UKG, Bill4Time, real-time logging, block billing, and writing descriptions.
+</div>
+
+<!-- ══ Q1 ══ -->
+<div class="q-card" id="q1">
+  <div class="q-topbar">
+    Question 1 of 6
+    <span class="q-tag">Hours Alignment</span>
+  </div>
+  <div class="q-body">
+    <div class="q-stem">You notice your UKG timecard shows 8 hours for Tuesday, but your Bill4Time only shows 2 billable hours. What is the most likely explanation?</div>
+    <div class="options">
+      <div class="option" onclick="selectOption('q1','a')">
+        <div class="option-letter">A</div>
+        <div class="option-text">Bill4Time is broken and not recording your time correctly.</div>
+      </div>
+      <div class="option" onclick="selectOption('q1','b')">
+        <div class="option-letter">B</div>
+        <div class="option-text">UKG tracks all hours worked (including admin, meetings, and non-billable time), while Bill4Time only captures billable client work — the gap reflects non-billable activity.</div>
+      </div>
+      <div class="option" onclick="selectOption('q1','c')">
+        <div class="option-letter">C</div>
+        <div class="option-text">You only need to log time in one system, so the difference does not matter.</div>
+      </div>
+      <div class="option" onclick="selectOption('q1','d')">
+        <div class="option-letter">D</div>
+        <div class="option-text">UKG automatically populates Bill4Time, so both should always show the same number.</div>
+      </div>
+    </div>
+    <div class="feedback" id="q1-feedback"></div>
+  </div>
+  <div class="q-footer">
+    <span class="answered-badge" id="q1-badge"></span>
+    <button class="btn-submit" id="q1-btn" onclick="submitAnswer('q1','b','UKG records your full shift — every hour you are clocked in. Bill4Time only records time you actively bill to a client matter. Non-billable time (internal meetings, admin tasks, lunch) will never appear in Bill4Time, so a gap between the two systems is normal and expected.')">Submit Answer</button>
+  </div>
+</div>
+
+<!-- ══ Q2 ══ -->
+<div class="q-card" id="q2">
+  <div class="q-topbar">
+    Question 2 of 6
+    <span class="q-tag">Real-Time Logging</span>
+  </div>
+  <div class="q-body">
+    <div class="q-stem">Which of the following best describes "back-billing," and why is it a problem?</div>
+    <div class="options">
+      <div class="option" onclick="selectOption('q2','a')">
+        <div class="option-letter">A</div>
+        <div class="option-text">Logging time before you start a task — it inflates hours.</div>
+      </div>
+      <div class="option" onclick="selectOption('q2','b')">
+        <div class="option-letter">B</div>
+        <div class="option-text">Logging all of your time entries at the end of the day from memory — it leads to imprecise times, forgotten tasks, and inaccurate client billing.</div>
+      </div>
+      <div class="option" onclick="selectOption('q2','c')">
+        <div class="option-letter">C</div>
+        <div class="option-text">Billing a client twice for the same task.</div>
+      </div>
+      <div class="option" onclick="selectOption('q2','d')">
+        <div class="option-letter">D</div>
+        <div class="option-text">Using Save &amp; Duplicate to carry over a description to a new entry.</div>
+      </div>
+    </div>
+    <div class="feedback" id="q2-feedback"></div>
+  </div>
+  <div class="q-footer">
+    <span class="answered-badge" id="q2-badge"></span>
+    <button class="btn-submit" id="q2-btn" onclick="submitAnswer('q2','b','Back-billing means reconstructing your day from memory at the end of a shift rather than logging each task as it happens. Human memory is unreliable — tasks get forgotten, durations are guessed, and client attribution becomes vague. Real-time logging eliminates these risks by capturing accurate information in the moment.')">Submit Answer</button>
+  </div>
+</div>
+
+<!-- ══ Q3 ══ -->
+<div class="q-card" id="q3">
+  <div class="q-topbar">
+    Question 3 of 6
+    <span class="q-tag">Block Billing – 3-Hour Rule</span>
+  </div>
+  <div class="q-body">
+    <div class="q-stem">You have been working on a complex document review for a single matter for 4 hours and are still not finished. What should you do?</div>
+    <div class="options">
+      <div class="option" onclick="selectOption('q3','a')">
+        <div class="option-letter">A</div>
+        <div class="option-text">Continue working and enter the full 4+ hours as one time entry when you finish.</div>
+      </div>
+      <div class="option" onclick="selectOption('q3','b')">
+        <div class="option-letter">B</div>
+        <div class="option-text">Stop working on the matter entirely — tasks cannot exceed 3 hours.</div>
+      </div>
+      <div class="option" onclick="selectOption('q3','c')">
+        <div class="option-letter">C</div>
+        <div class="option-text">Save and close your current entry before reaching the 3-hour mark, then use Save &amp; Duplicate to open a new entry for the remaining time, updating the start time and clearing the end time.</div>
+      </div>
+      <div class="option" onclick="selectOption('q3','d')">
+        <div class="option-letter">D</div>
+        <div class="option-text">Ask your supervisor to enter the time on your behalf so it does not count against the limit.</div>
+      </div>
+    </div>
+    <div class="feedback" id="q3-feedback"></div>
+  </div>
+  <div class="q-footer">
+    <span class="answered-badge" id="q3-badge"></span>
+    <button class="btn-submit" id="q3-btn" onclick="submitAnswer('q3','c','No single time entry may exceed 3 hours — block billing is not permitted. The correct approach is to save and close the first entry before the limit is reached, then use Save &amp; Duplicate to carry the description forward into a new entry. Always update the start time on the new entry and clear the end time before continuing.')">Submit Answer</button>
+  </div>
+</div>
+
+<!-- ══ Q4 ══ -->
+<div class="q-card" id="q4">
+  <div class="q-topbar">
+    Question 4 of 6
+    <span class="q-tag">Block Billing – 3-Hour Rule</span>
+  </div>
+  <div class="q-body">
+    <div class="q-stem">When you use Save &amp; Duplicate to split a long entry, which two fields must you update on the new (duplicated) entry?</div>
+    <div class="options">
+      <div class="option" onclick="selectOption('q4','a')">
+        <div class="option-letter">A</div>
+        <div class="option-text">Client name and matter number.</div>
+      </div>
+      <div class="option" onclick="selectOption('q4','b')">
+        <div class="option-letter">B</div>
+        <div class="option-text">Start Time (update to when you continued) and End Time (clear it so it is blank).</div>
+      </div>
+      <div class="option" onclick="selectOption('q4','c')">
+        <div class="option-letter">C</div>
+        <div class="option-text">Private Description and Entry Type.</div>
+      </div>
+      <div class="option" onclick="selectOption('q4','d')">
+        <div class="option-letter">D</div>
+        <div class="option-text">Billable hours and Rate.</div>
+      </div>
+    </div>
+    <div class="feedback" id="q4-feedback"></div>
+  </div>
+  <div class="q-footer">
+    <span class="answered-badge" id="q4-badge"></span>
+    <button class="btn-submit" id="q4-btn" onclick="submitAnswer('q4','b','Save &amp; Duplicate carries over the description, client, matter, and activity automatically. The two fields you are responsible for updating are: (1) Start Time — set it to the time you resumed work, and (2) End Time — clear it completely so the system can calculate the new entry\'s duration correctly.')">Submit Answer</button>
+  </div>
+</div>
+
+<!-- ══ Q5 ══ -->
+<div class="q-card" id="q5">
+  <div class="q-topbar">
+    Question 5 of 6
+    <span class="q-tag">Private Description</span>
+  </div>
+  <div class="q-body">
+    <div class="q-stem">Which of the following is an acceptable Private Description for a time entry?</div>
+    <div class="options">
+      <div class="option" onclick="selectOption('q5','a')">
+        <div class="option-letter">A</div>
+        <div class="option-text">Worked on cases.</div>
+      </div>
+      <div class="option" onclick="selectOption('q5','b')">
+        <div class="option-letter">B</div>
+        <div class="option-text">Rev'd med. recs &amp; drft'd dmnd ltr w/ atty — fwd to sup for apprvl.</div>
+      </div>
+      <div class="option" onclick="selectOption('q5','c')">
+        <div class="option-letter">C</div>
+        <div class="option-text">Reviewed medical records received from treating physician and drafted demand letter for Matter PI-2026-0441 (Patel, Rajesh); forwarded to supervising attorney for review and approval.</div>
+      </div>
+      <div class="option" onclick="selectOption('q5','d')">
+        <div class="option-letter">D</div>
+        <div class="option-text">From: r.patel@email.com — "Hi, just following up on the demand letter, my diagnosis is L4-L5 disc herniation and my SSN is 4XX-XX-6712..."</div>
+      </div>
+    </div>
+    <div class="feedback" id="q5-feedback"></div>
+  </div>
+  <div class="q-footer">
+    <span class="answered-badge" id="q5-badge"></span>
+    <button class="btn-submit" id="q5-btn" onclick="submitAnswer('q5','c','Option C is correct. It identifies the matter number and client display name, spells out all words, and describes the specific work performed clearly enough for a judge or billing reviewer to understand — without including any client personal information, medical findings, or copied correspondence.')">Submit Answer</button>
+  </div>
+</div>
+
+<!-- ══ Q6 ══ -->
+<div class="q-card" id="q6">
+  <div class="q-topbar">
+    Question 6 of 6
+    <span class="q-tag">Private Description</span>
+  </div>
+  <div class="q-body">
+    <div class="q-stem">A client emails you details about their case including their diagnosis, Social Security number, and financial losses. You want to reference this conversation in your time entry. What should you do?</div>
+    <div class="options">
+      <div class="option" onclick="selectOption('q6','a')">
+        <div class="option-letter">A</div>
+        <div class="option-text">Copy and paste the email directly into the Private Description field — it is marked private so it is safe.</div>
+      </div>
+      <div class="option" onclick="selectOption('q6','b')">
+        <div class="option-letter">B</div>
+        <div class="option-text">Leave the description blank since the content is too sensitive to include.</div>
+      </div>
+      <div class="option" onclick="selectOption('q6','c')">
+        <div class="option-letter">C</div>
+        <div class="option-text">Write a professional summary of the work you performed in your own words — describe the activity (e.g., "Reviewed client correspondence and responded to inquiry regarding case status") without including any personal data, diagnosis, or financial figures.</div>
+      </div>
+      <div class="option" onclick="selectOption('q6','d')">
+        <div class="option-letter">D</div>
+        <div class="option-text">Paste a shortened version of the email with the SSN removed.</div>
+      </div>
+    </div>
+    <div class="feedback" id="q6-feedback"></div>
+  </div>
+  <div class="q-footer">
+    <span class="answered-badge" id="q6-badge"></span>
+    <button class="btn-submit" id="q6-btn" onclick="submitAnswer('q6','c','Never copy or paste client emails, call notes, or transcripts — even into a private field. Personal information (SSN, diagnosis, financials) must never appear in a time entry description. The correct approach is to write a clear, professional summary of the work you did in your own words, with no client personal data included.')">Submit Answer</button>
+  </div>
+</div>
+
+<!-- Score summary -->
+<div class="score-card" id="score-card">
+  <div class="score-topbar">Results — Knowledge Check Complete</div>
+  <div class="score-body">
+    <div class="score-circle">
+      <div class="score-num" id="score-num">0</div>
+      <div class="score-denom">out of 6</div>
+    </div>
+    <div class="score-text">
+      <h3 id="score-heading"></h3>
+      <p id="score-message"></p>
+    </div>
+  </div>
+  <div class="score-footer">
+    <button class="btn-retry" onclick="resetAll()">Try Again</button>
+  </div>
+</div>
+
+<script>
+  const answers  = {}; // q-id → chosen letter
+  const correct  = {}; // q-id → correct letter
+  const feedback = {}; // q-id → feedback text
+  const total    = 6;
+
+  // Populated by submitAnswer calls above — but we collect correct answers here too
+  const correctMap = { q1:'b', q2:'b', q3:'c', q4:'b', q5:'c', q6:'c' };
+
+  function selectOption(qid, letter) {
+    if (answers[qid] !== undefined) return; // already answered
+    // Clear previous hover selection visuals
+    const opts = document.querySelectorAll(`#${qid} .option`);
+    opts.forEach(o => o.classList.remove('hover-selected'));
+    // Mark as pending selection (store but don't lock yet)
+    if (!answers[qid + '_pending']) {
+      document.querySelectorAll(`#${qid} .option`).forEach(o => {
+        o.style.outline = 'none';
+      });
+    }
+    // Highlight selected
+    opts.forEach(o => o.style.outline = 'none');
+    const chosen = document.querySelector(`#${qid} .option:nth-child(${letterIndex(letter)+1})`);
+    if (chosen) chosen.style.outline = '2px solid #1e4da1';
+    answers[qid + '_pending'] = letter;
+  }
+
+  function letterIndex(l) { return ['a','b','c','d'].indexOf(l); }
+
+  function submitAnswer(qid, correctLetter, feedbackText) {
+    const chosen = answers[qid + '_pending'];
+    if (!chosen) return; // nothing selected
+    if (answers[qid] !== undefined) return; // already locked
+
+    answers[qid] = chosen;
+    const isCorrect = chosen === correctLetter;
+
+    // Lock all options
+    const opts = document.querySelectorAll(`#${qid} .option`);
+    opts.forEach((o, i) => {
+      o.style.outline = 'none';
+      o.style.pointerEvents = 'none';
+      const letter = ['a','b','c','d'][i];
+      if (letter === correctLetter) {
+        o.classList.add('reveal-correct');
+      } else if (letter === chosen && !isCorrect) {
+        o.classList.add('selected-wrong');
+      } else {
+        o.classList.add('dimmed');
+      }
+    });
+
+    // Feedback
+    const fb = document.getElementById(qid + '-feedback');
+    fb.style.display = 'block';
+    if (isCorrect) {
+      fb.className = 'feedback correct';
+      fb.innerHTML = '<strong>✓ Correct.</strong> ' + feedbackText;
+    } else {
+      fb.className = 'feedback wrong';
+      fb.innerHTML = '<strong>✕ Not quite.</strong> ' + feedbackText;
+    }
+
+    // Badge + disable button
+    const badge = document.getElementById(qid + '-badge');
+    badge.style.display = 'inline-block';
+    badge.className = 'answered-badge ' + (isCorrect ? 'correct' : 'wrong');
+    badge.textContent = isCorrect ? '✓ Correct' : '✕ Incorrect';
+
+    const btn = document.getElementById(qid + '-btn');
+    btn.disabled = true;
+
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const answered = Object.keys(answers).filter(k => !k.includes('_pending')).length;
+    const pct = (answered / total) * 100;
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = answered + ' of ' + total + ' answered';
+
+    if (answered === total) {
+      showScore();
+    }
+  }
+
+  function showScore() {
+    const sc = document.getElementById('score-card');
+    sc.style.display = 'block';
+    sc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    let correct = 0;
+    for (let i = 1; i <= total; i++) {
+      const qid = 'q' + i;
+      if (answers[qid] === correctMap[qid]) correct++;
+    }
+
+    document.getElementById('score-num').textContent = correct;
+
+    let heading, message;
+    if (correct === 6) {
+      heading = 'Excellent — full marks!';
+      message = 'You have a strong understanding of UKG and Bill4Time time entry requirements, real-time logging, the 3-hour block billing rule, and how to write a compliant private description. You are ready to apply these practices in your daily work.';
+      document.querySelector('.score-circle').style.borderColor = '#60a860';
+      document.getElementById('score-num').style.color = '#1a5a1a';
+    } else if (correct >= 4) {
+      heading = 'Good work — almost there.';
+      message = 'You have a solid grasp of most concepts. Review any questions you missed and revisit the relevant section of the training before applying these practices in Bill4Time.';
+    } else {
+      heading = 'Keep reviewing.';
+      message = 'It looks like a few of the core concepts need a closer look. We recommend revisiting the Hours Alignment, Real-Time Logging, Block Billing, and Description guidelines before retaking this check.';
+      document.querySelector('.score-circle').style.borderColor = '#e05050';
+      document.getElementById('score-num').style.color = '#8a2020';
+    }
+
+    document.getElementById('score-heading').textContent = heading;
+    document.getElementById('score-message').textContent = message;
+  }
+
+  function resetAll() {
+    // Clear state
+    for (const key of Object.keys(answers)) delete answers[key];
+
+    // Reset each question
+    for (let i = 1; i <= total; i++) {
+      const qid = 'q' + i;
+      const opts = document.querySelectorAll(`#${qid} .option`);
+      opts.forEach(o => {
+        o.className = 'option';
+        o.style.outline = 'none';
+        o.style.pointerEvents = '';
+        o.onclick = o.onclick; // keep handler
+      });
+      // Re-attach onclick (lost on className reset)
+      rebindClicks(qid);
+
+      const fb = document.getElementById(qid + '-feedback');
+      fb.style.display = 'none';
+      fb.textContent = '';
+
+      const badge = document.getElementById(qid + '-badge');
+      badge.style.display = 'none';
+
+      const btn = document.getElementById(qid + '-btn');
+      btn.disabled = false;
+    }
+
+    document.getElementById('progress-bar').style.width = '0%';
+    document.getElementById('progress-label').textContent = '0 of 6 answered';
+    document.getElementById('score-card').style.display = 'none';
+    document.querySelector('.score-circle').style.borderColor = '#1e4da1';
+    document.getElementById('score-num').style.color = '#1e4da1';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function rebindClicks(qid) {
+    const opts = document.querySelectorAll(`#${qid} .option`);
+    opts.forEach((o, i) => {
+      const letter = ['a','b','c','d'][i];
+      o.onclick = () => selectOption(qid, letter);
+    });
+  }
+</script>
+</body>
+</html>
