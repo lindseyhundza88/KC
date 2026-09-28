@@ -272,33 +272,25 @@
 <div class="q-card" id="q1">
   <div class="q-topbar">
     Question 1 of 6
-    <span class="q-tag">Hours Alignment</span>
+    <span class="q-tag">Creating a Time Entry</span>
   </div>
   <div class="q-body">
-    <div class="q-stem">You notice your UKG timecard shows 8 hours for Tuesday, but your Bill4Time only shows 2 billable hours. What is the most likely explanation?</div>
+    <div class="q-stem">When you finish a task in Bill4Time, you should click <strong>Get Time</strong> next to the End Time field to automatically stamp the time — you should never type the end time in manually.</div>
     <div class="options">
       <div class="option" onclick="selectOption('q1','a')">
         <div class="option-letter">A</div>
-        <div class="option-text">Bill4Time is broken and not recording your time correctly.</div>
+        <div class="option-text">True</div>
       </div>
       <div class="option" onclick="selectOption('q1','b')">
         <div class="option-letter">B</div>
-        <div class="option-text">UKG tracks all hours worked (including admin, meetings, and non-billable time), while Bill4Time only captures billable client work — the gap reflects non-billable activity.</div>
-      </div>
-      <div class="option" onclick="selectOption('q1','c')">
-        <div class="option-letter">C</div>
-        <div class="option-text">You only need to log time in one system, so the difference does not matter.</div>
-      </div>
-      <div class="option" onclick="selectOption('q1','d')">
-        <div class="option-letter">D</div>
-        <div class="option-text">UKG automatically populates Bill4Time, so both should always show the same number.</div>
+        <div class="option-text">False</div>
       </div>
     </div>
     <div class="feedback" id="q1-feedback"></div>
   </div>
   <div class="q-footer">
     <span class="answered-badge" id="q1-badge"></span>
-    <button class="btn-submit" id="q1-btn" onclick="submitAnswer('q1','b','UKG records your full shift — every hour you are clocked in. Bill4Time only records time you actively bill to a client matter. Non-billable time (internal meetings, admin tasks, lunch) will never appear in Bill4Time, so a gap between the two systems is normal and expected.')">Submit Answer</button>
+    <button class="btn-submit" id="q1-btn" onclick="submitAnswer('q1','a','Get Time automatically stamps the exact current time as your end time and auto-calculates your billable hours. Typing the end time manually introduces the risk of error and can create the appearance of inaccurate billing. Always click Get Time when you have finished a task.')">Submit Answer</button>
   </div>
 </div>
 
@@ -497,7 +489,7 @@
   const total    = 6;
 
   // Populated by submitAnswer calls above — but we collect correct answers here too
-  const correctMap = { q1:'b', q2:'b', q3:'c', q4:'b', q5:'c', q6:'c' };
+  const correctMap = { q1:'a', q2:'b', q3:'c', q4:'b', q5:'c', q6:'c' };
 
   function selectOption(qid, letter) {
     if (answers[qid] !== undefined) return; // already answered
